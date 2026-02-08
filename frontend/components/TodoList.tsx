@@ -27,7 +27,7 @@ export default function TodoList() {
     try {
       setDeleting(index);
       await todoApi.deleteTodo(index);
-      await fetchTodos(); // Refresh the list
+      await fetchTodos();
     } catch (err) {
       console.error('Failed to delete todo:', err);
       setError('Failed to delete todo');
@@ -40,71 +40,80 @@ export default function TodoList() {
     fetchTodos();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">Your Todos</h2>
-        <p className="text-gray-600">Loading...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">Your Todos</h2>
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600">{error}</p>
-          <button
-            onClick={fetchTodos}
-            className="mt-2 text-sm text-red-700 underline hover:text-red-800"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">Your Todos</h2>
+    <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-6 flex flex-col h-[600px]">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+            <span className="text-white text-lg">📋</span>
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">Your Tasks</h2>
+            <p className="text-xs text-gray-400">{todos.length} total</p>
+          </div>
+        </div>
         <button
           onClick={fetchTodos}
-          className="text-sm text-blue-600 hover:text-blue-800 underline"
+          className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition"
         >
           Refresh
         </button>
       </div>
 
-      {todos.length === 0 ? (
-        <p className="text-gray-500 italic">No todos yet. Add one using the chat below!</p>
-      ) : (
-        <ul className="space-y-2">
-          {todos.map((todo, index) => (
-            <li
-              key={index}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition group"
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto chat-scroll">
+        {loading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="mt-3 text-gray-500 text-sm">Loading tasks...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-100 rounded-xl p-4 mt-4">
+            <p className="text-red-600 text-sm">{error}</p>
+            <button
+              onClick={fetchTodos}
+              className="mt-2 text-sm text-red-700 font-medium hover:text-red-800 underline"
             >
-              <div className="flex items-start flex-1">
-                <span className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm mr-3">
-                  {index + 1}
-                </span>
-                <span className="text-gray-800">{todo}</span>
-              </div>
-              <button
-                onClick={() => handleDelete(index)}
-                disabled={deleting === index}
-                className="ml-4 px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition opacity-0 group-hover:opacity-100 disabled:opacity-50"
-                title="Delete todo"
+              Try again
+            </button>
+          </div>
+        ) : todos.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="text-5xl mb-3 opacity-30">📝</div>
+              <p className="text-gray-400 text-sm">No tasks yet</p>
+              <p className="text-gray-300 text-xs mt-1">Use the chat to add tasks!</p>
+            </div>
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {todos.map((todo, index) => (
+              <li
+                key={index}
+                className="flex items-center justify-between p-3.5 bg-gray-50 hover:bg-blue-50 rounded-xl transition group border border-transparent hover:border-blue-100"
               >
-                {deleting === index ? 'Deleting...' : 'Delete'}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+                <div className="flex items-center flex-1 min-w-0">
+                  <span className="flex-shrink-0 w-7 h-7 bg-gradient-to-br from-blue-500 to-indigo-500 text-white rounded-lg flex items-center justify-center text-xs font-bold mr-3">
+                    {index + 1}
+                  </span>
+                  <span className="text-gray-700 text-sm truncate">{todo}</span>
+                </div>
+                <button
+                  onClick={() => handleDelete(index)}
+                  disabled={deleting === index}
+                  className="ml-3 px-2.5 py-1 text-xs text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition opacity-0 group-hover:opacity-100 disabled:opacity-50 border border-red-200 hover:border-red-500"
+                  title="Delete"
+                >
+                  {deleting === index ? '...' : 'Delete'}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

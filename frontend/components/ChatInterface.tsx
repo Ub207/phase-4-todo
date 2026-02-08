@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { todoApi } from '@/lib/api';
 
 interface Message {
@@ -13,6 +13,15 @@ export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -28,18 +37,14 @@ export default function ChatInterface() {
     setLoading(true);
 
     try {
-      // Try to run the task with AI agent
       const response = await todoApi.runTask(input);
-
       const aiMessage: Message = {
         type: 'ai',
         content: response.result || 'Task processed successfully!',
         timestamp: new Date(),
       };
-
       setMessages((prev) => [...prev, aiMessage]);
     } catch (err: any) {
-      // If AI agent fails, try to add as a simple todo
       try {
         const addResponse = await todoApi.addTodo(input);
         const aiMessage: Message = {
@@ -69,14 +74,39 @@ export default function ChatInterface() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 flex flex-col h-[600px]">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800">AI Todo Assistant</h2>
+    <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-6 flex flex-col h-[600px]">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+          <span className="text-white text-lg">💬</span>
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-gray-800">AI Assistant</h2>
+          <p className="text-xs text-gray-400">Ask me to manage your tasks</p>
+        </div>
+        <div className="ml-auto flex items-center gap-1.5">
+          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          <span className="text-xs text-gray-400">Online</span>
+        </div>
+      </div>
 
-      <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto mb-4 space-y-3 chat-scroll">
         {messages.length === 0 ? (
-          <div className="text-center text-gray-500 italic mt-8">
-            <p>Start chatting with your AI assistant!</p>
-            <p className="text-sm mt-2">Try: "Add a task to buy groceries" or "Remind me to call mom"</p>
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="text-5xl mb-4 opacity-30">💡</div>
+              <p className="text-gray-400 text-sm font-medium">Start chatting!</p>
+              <div className="mt-3 space-y-1.5">
+                <p className="text-xs text-gray-300 bg-gray-50 rounded-lg px-3 py-1.5 inline-block">
+                  "Add a task to buy groceries"
+                </p>
+                <br />
+                <p className="text-xs text-gray-300 bg-gray-50 rounded-lg px-3 py-1.5 inline-block">
+                  "Remind me to call mom"
+                </p>
+              </div>
+            </div>
           </div>
         ) : (
           messages.map((msg, index) => (
@@ -85,15 +115,15 @@ export default function ChatInterface() {
               className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] rounded-lg p-3 ${
+                className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
                   msg.type === 'user'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-800'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-br-md'
+                    : 'bg-gray-100 text-gray-800 rounded-bl-md'
                 }`}
               >
-                <p className="text-sm">{msg.content}</p>
-                <p className="text-xs mt-1 opacity-70">
-                  {msg.timestamp.toLocaleTimeString()}
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                <p className={`text-[10px] mt-1 ${msg.type === 'user' ? 'text-white/60' : 'text-gray-400'}`}>
+                  {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
             </div>
@@ -102,8 +132,8 @@ export default function ChatInterface() {
 
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-lg p-3">
-              <div className="flex space-x-2">
+            <div className="bg-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
+              <div className="flex space-x-1.5">
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div>
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
@@ -111,8 +141,10 @@ export default function ChatInterface() {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
+      {/* Input */}
       <div className="flex gap-2">
         <input
           type="text"
@@ -120,13 +152,13 @@ export default function ChatInterface() {
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Type your message..."
-          className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+          className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 text-sm placeholder-gray-400"
           disabled={loading}
         />
         <button
           onClick={handleSend}
           disabled={loading || !input.trim()}
-          className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+          className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-5 py-2.5 rounded-xl hover:from-blue-600 hover:to-indigo-600 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed transition-all text-sm font-medium shadow-md hover:shadow-lg disabled:shadow-none"
         >
           Send
         </button>

@@ -5,28 +5,32 @@ import TodoList from '@/components/TodoList';
 
 export default function Home() {
   return (
-    <main className="min-h-screen p-8">
+    <main className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
+        {/* Header */}
         <header className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl mb-4">
+            <span className="text-3xl">🤖</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-3 tracking-tight">
             AI Todo Chatbot
           </h1>
-          <p className="text-gray-600">
-            Manage your tasks with the help of AI
+          <p className="text-lg text-white/80 max-w-md mx-auto">
+            Manage your tasks with the help of AI — just type what you need!
           </p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div>
-            <TodoList />
-          </div>
-          <div>
-            <ChatInterface />
-          </div>
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TodoList />
+          <ChatInterface />
         </div>
 
-        <footer className="mt-8 text-center text-sm text-gray-500">
-          <p>Powered by FastAPI & Next.js 14</p>
+        {/* Footer */}
+        <footer className="mt-10 text-center">
+          <p className="text-sm text-white/50">
+            Powered by FastAPI & Next.js — Phase 4
+          </p>
         </footer>
       </div>
     </main>
