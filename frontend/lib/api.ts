@@ -17,7 +17,8 @@ export interface AddTodoResponse {
 
 export interface RunTaskResponse {
   task: string;
-  result: any;
+  result: string;
+  todosChanged?: boolean;
 }
 
 const api = axios.create({

@@ -44,6 +44,11 @@ export default function ChatInterface() {
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, aiMessage]);
+
+      // Notify TodoList to refresh if tasks were modified
+      if (response.todosChanged) {
+        window.dispatchEvent(new CustomEvent('todosUpdated'));
+      }
     } catch (err: any) {
       try {
         const addResponse = await todoApi.addTodo(input);
@@ -53,10 +58,11 @@ export default function ChatInterface() {
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, aiMessage]);
+        window.dispatchEvent(new CustomEvent('todosUpdated'));
       } catch (addErr) {
         const errorMessage: Message = {
           type: 'ai',
-          content: 'Sorry, I encountered an error. Please make sure the backend is running.',
+          content: 'Sorry, I encountered an error. Please try again.',
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, errorMessage]);

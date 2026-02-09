@@ -38,6 +38,11 @@ export default function TodoList() {
 
   useEffect(() => {
     fetchTodos();
+
+    // Refresh when ChatInterface modifies tasks
+    const handleTodosUpdated = () => fetchTodos();
+    window.addEventListener('todosUpdated', handleTodosUpdated);
+    return () => window.removeEventListener('todosUpdated', handleTodosUpdated);
   }, []);
 
   return (
