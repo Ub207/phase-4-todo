@@ -80,3 +80,5 @@ htmlcov/
 kubernetes/scripts/minikube-*
 *.exe
 *.bin
+.vercel
+.env*.local
